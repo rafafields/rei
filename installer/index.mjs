@@ -12,6 +12,7 @@ import { uninstallBlock, hasBlock, installScript } from './lib/profile.mjs';
 const args = new Set(process.argv.slice(2));
 const DRY = args.has('--dry-run');
 const UNINSTALL = args.has('--uninstall');
+const CUSTOMISE = args.has('--customise');
 const REPO_URL = 'https://github.com/rafafields/rei.git';
 const here = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const inCheckout = fs.existsSync(path.join(here, 'scripts', 'rei.ps1'));
@@ -25,6 +26,12 @@ async function main() {
 
   const repo = await locateRepo();
   if (UNINSTALL) return uninstall(repo);
+  if (CUSTOMISE) {
+    if (DRY) { p.outro('Dry run: would open Claude Code in the repo with docs/customise-with-claude.md.'); return; }
+    launchClaude(repo);
+    p.outro('Done.');
+    return;
+  }
 
   // 1. requirements
   const reqs = checkRequirements();
@@ -111,10 +118,20 @@ async function main() {
 
   // 6. Claude Code
   p.log.success('Open a new PowerShell window and run: rei');
-  if (cancelled(await p.confirm({ message: 'Open Claude Code in the repo to customise Rei (palette, panel, status line)?', initialValue: false }))) {
-    spawnSync('claude', ['Read CLAUDE.md, then ask me what I want to change in Rei.'], { cwd: repo, stdio: 'inherit', shell: true });
+  if (cancelled(await p.confirm({ message: 'Let Claude Code set up the panel for you? It asks what you want to see and builds it (checked and reversible).', initialValue: true }))) {
+    launchClaude(repo);
   }
-  p.outro('Rei is ready.');
+  p.outro('Rei is ready. To customise again later: node installer/index.mjs --customise');
+}
+
+// The prompt is one line with no inner quotes so it survives cmd.exe; the real brief is in the repo.
+function launchClaude(repo) {
+  if (!checkRequirements().find((r) => r.name === 'Claude Code')?.ok) {
+    p.log.warn('Claude Code is not installed: npm install -g @anthropic-ai/claude-code');
+    return;
+  }
+  p.log.info('Opening Claude Code. It will ask what you want in the panel; leave it with /exit when done.');
+  spawnSync('claude', ['"Follow docs/customise-with-claude.md to customise Rei for me."'], { cwd: repo, stdio: 'inherit', shell: true });
 }
 
 async function locateRepo() {
