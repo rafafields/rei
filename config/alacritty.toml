@@ -1,0 +1,9 @@
+# Example Alacritty config for Rei. Copy to %APPDATA%\alacritty\alacritty.toml
+# and adjust the import path to where you cloned the repo.
+
+[general]
+import = ["C:/code/rei/theme/rei.toml"]
+
+[window]
+opacity = 1.0
+padding = { x = 12, y = 10 }

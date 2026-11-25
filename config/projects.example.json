@@ -1,0 +1,6 @@
+{
+  "projects": [
+    { "name": "rei", "path": "C:/code/rei" },
+    { "name": "my-project", "path": "C:/code/my-project", "check": "npm test" }
+  ]
+}

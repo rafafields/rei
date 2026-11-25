@@ -1,0 +1,63 @@
+# Rei (零) - Alacritty colour theme
+# Dark, near-black background, bone-white text, reds for everything else.
+# Every text colour keeps >= 4.5:1 contrast against the background.
+
+[colors.primary]
+background = "#0a0a0b"
+foreground = "#e8e4d8"
+dim_foreground = "#a8a498"
+bright_foreground = "#f4f0e4"
+
+[colors.cursor]
+text = "#0a0a0b"
+cursor = "#e0364a"
+
+[colors.vi_mode_cursor]
+text = "#0a0a0b"
+cursor = "#f4f0e4"
+
+[colors.selection]
+text = "#f4f0e4"
+background = "#4a1520"
+
+[colors.search.matches]
+foreground = "#0a0a0b"
+background = "#ee8e72"
+
+[colors.search.focused_match]
+foreground = "#0a0a0b"
+background = "#e0364a"
+
+[colors.footer_bar]
+foreground = "#e8e4d8"
+background = "#1a1a1d"
+
+[colors.hints.start]
+foreground = "#0a0a0b"
+background = "#ee8e72"
+
+[colors.hints.end]
+foreground = "#0a0a0b"
+background = "#a8a498"
+
+# Every non-neutral colour is a shade of red, except green, which stays neon so diffs read at a glance (crimson, vermilion, coral, rose, raspberry, blush),
+# kept apart by hue and lightness so they stay distinguishable. Black, white and the greys are neutral.
+[colors.normal]
+black = "#1a1a1d"
+red = "#e0364a"      # crimson
+green = "#39ff14"    # neon green (diff additions)
+yellow = "#ee8e72"   # coral
+blue = "#d4577a"     # rose
+magenta = "#cc4a7e"  # raspberry
+cyan = "#f2a0ae"     # blush
+white = "#c9c5b8"
+
+[colors.bright]
+black = "#7d7d85"
+red = "#ff5468"
+green = "#7cff63"
+yellow = "#ffab8c"
+blue = "#ec7f9e"
+magenta = "#e0679a"
+cyan = "#f8c0c8"
+white = "#f4f0e4"
