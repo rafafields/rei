@@ -2,6 +2,10 @@
 
 `scripts/panel.ps1 -Name <project>` is the narrow window that `rei` opens next to Claude Code. It repaints in place on the terminal's alternate screen using absolute cursor positioning, so it never scrolls, and it rewrites only the lines that changed.
 
+## How it is built
+
+The panel draws the header and the clock. Everything in between is a **section** (a small script returning a title and lines), run in the background with a time limit, so a broken section shows an error line and never takes the panel down. You can pick, order and add sections: see [sections.md](sections.md).
+
 ## What it shows
 
 Always:
@@ -27,7 +31,7 @@ Labels in the panel are in Spanish.
 
 ## Refresh
 
-Data is read every 5 seconds (ports every 10). The clock line updates every second. Resizing the window forces a full repaint.
+Each section refreshes on its own interval (git and memory every 5 seconds, ports every 10, check every second; `every` in the config overrides it). The clock line updates every second. Resizing the window forces a full repaint.
 
 ## Keys
 
@@ -53,4 +57,5 @@ Shared with the status line (`Get-ReiColors` in `scripts/common.ps1`): light pin
 scripts\panel.ps1 -Name my-project -Once -Width 40            # render once to stdout
 scripts\panel.ps1 -Name my-project -Once -PreviewCheck fail   # preview the check states
 scripts\panel.ps1 -Name my-project -Frames 3 -Width 40        # run the real painter and print the bytes
+scripts\panel.ps1 -Name my-project -TestSection git           # validate one section
 ```

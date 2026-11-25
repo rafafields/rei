@@ -39,3 +39,34 @@ function Get-ReiColors {
         Info   = (New-ReiAnsi 'ee8e72'); Branch = (New-ReiAnsi 'd4577a'); Ok = (New-ReiAnsi 'f2a0ae')
     }
 }
+
+# Progress bar made of one ASCII character ('|' or '/'): filled part coloured, empty part dim.
+# The character comes from "bar" in the config (default '|').
+function Get-ReiBarChar {
+    try { $c = (Read-ReiConfig).bar } catch { $c = $null }
+    if ($c -eq '/') { '/' } else { '|' }
+}
+function Format-ReiBar([double]$Percent, [int]$Width, [string]$Color, [string]$Char = '|') {
+    $Width = [math]::Max(3, $Width)
+    $filled = [int][math]::Round($Width * [math]::Min(100, [math]::Max(0, $Percent)) / 100)
+    $c = Get-ReiColors
+    "$Color$($Char * $filled)$($c.Dim)$($Char * ($Width - $filled))$($c.Reset)"
+}
+
+# Text helpers shared by the panel and its sections.
+function Cut([string]$s, [int]$w) {
+    if ($w -lt 2) { return '' }
+    if ($s.Length -le $w) { $s } else { $s.Substring(0, $w - 1) + [string][char]0x2026 }
+}
+function CutLeft([string]$s, [int]$w) {
+    if ($w -lt 2) { return '' }
+    if ($s.Length -le $w) { $s } else { [string][char]0x2026 + $s.Substring($s.Length - $w + 1) }
+}
+function Format-Ago([datetime]$when) {
+    $span = (Get-Date) - $when
+    if ($span.TotalMinutes -lt 1) { return 'ahora' }
+    if ($span.TotalHours -lt 1) { return "hace $([int]$span.TotalMinutes) min" }
+    if ($span.TotalDays -lt 1) { return "hace $([int]$span.TotalHours) h" }
+    if ($span.TotalDays -lt 60) { return "hace $([int]$span.TotalDays) d" }
+    "hace $([int]($span.TotalDays / 30)) meses"
+}

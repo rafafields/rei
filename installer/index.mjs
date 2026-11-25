@@ -74,8 +74,14 @@ async function main() {
     opts = { ratio: r, system: feats.includes('system'), logo: feats.includes('logo'), statusLine: feats.includes('statusLine') };
   }
 
+  const keys = cancelled(await p.confirm({ message: 'Install Rei key bindings? (Shift+Enter new line, Ctrl+Backspace/Delete delete words, selection copies to clipboard)', initialValue: true }));
+
+  const bar = cancelled(await p.select({ message: 'Progress bar style (panel and status line)', initialValue: existing?.bar === '/' ? '/' : '|', options: [
+    { value: '|', label: '|||||||||| 60%' }, { value: '/', label: '////////// 60%' }] }));
+
   // 4. summary
   const themeFile = path.join(repo, 'theme', 'rei.toml');
+  const keysFile = path.join(repo, 'theme', 'keys.toml');
   const alaFile = alacrittyConfigPath();
   const plan = [
     `Write ${path.join(repo, 'config', 'projects.json')} (${projects.length} project(s))`,
@@ -89,9 +95,10 @@ async function main() {
   // 5. apply
   const s = p.spinner();
   s.start('Applying');
-  writeConfig(repo, buildConfig({ projects, ...opts }));
+  writeConfig(repo, buildConfig({ projects, ...opts, bar }));
   const old = fs.existsSync(alaFile) ? fs.readFileSync(alaFile, 'utf8') : '';
-  const next = addImport(old, themeFile);
+  let next = addImport(old, themeFile);
+  next = keys ? addImport(next, keysFile) : removeImport(next, keysFile);
   if (next !== old) {
     const b = backup(alaFile);
     fs.mkdirSync(path.dirname(alaFile), { recursive: true });
@@ -137,7 +144,7 @@ async function uninstall(repo) {
   if (!cancelled(await p.confirm({ message: 'Go ahead?', initialValue: true }))) { p.cancel('Nothing was changed.'); return; }
   if (fs.existsSync(alaFile)) {
     const old = fs.readFileSync(alaFile, 'utf8');
-    const next = removeImport(old, path.join(repo, 'theme', 'rei.toml'));
+    const next = removeImport(removeImport(old, path.join(repo, 'theme', 'rei.toml')), path.join(repo, 'theme', 'keys.toml'));
     if (next !== old) { backup(alaFile); fs.writeFileSync(alaFile, next, 'utf8'); }
   }
   if (prof) uninstallBlock(prof);

@@ -17,7 +17,7 @@ Everything is wrapped in a dark theme where every colour that is not neutral is 
 |---|---|---|
 | `theme/rei.toml` | Alacritty colour theme | [docs/theme.md](docs/theme.md) |
 | `scripts/rei.ps1` | The `rei` command: launches and places the windows | [docs/launcher.md](docs/launcher.md) |
-| `scripts/panel.ps1` | The right-hand panel | [docs/panel.md](docs/panel.md) |
+| `scripts/panel.ps1` | The right-hand panel, made of sections you can add to | [docs/panel.md](docs/panel.md), [docs/sections.md](docs/sections.md) |
 | `scripts/statusline.ps1` | Claude Code status line | [docs/statusline.md](docs/statusline.md) |
 | `installer/` | Interactive installer (Node) | [docs/installer.md](docs/installer.md) |
 

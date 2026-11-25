@@ -26,8 +26,11 @@ $sep = " $Dim$([char]0x2502)$R "
 
 function Cut([string]$s, [int]$w) { if ($s.Length -le $w) { $s } else { $s.Substring(0, [math]::Max(1, $w - 1)) + $ellipsis } }
 
+$barChar = Get-ReiBarChar
+$barW = 10
 $cols = 0; [void][int]::TryParse($env:COLUMNS, [ref]$cols)
 $narrow = ($cols -gt 0 -and $cols -lt 90)
+if ($narrow) { $barW = 6 }
 
 $cwd = if ($j.workspace.current_dir) { [string]$j.workspace.current_dir } else { [string]$j.cwd }
 $segments = New-Object System.Collections.Generic.List[string]
@@ -64,9 +67,17 @@ $used = $j.context_window.used_percentage
 if ($null -ne $used) {
     $pct = [int][math]::Round([double]$used)
     $col = if ($pct -ge 80) { $Red } elseif ($pct -ge 60) { $Yellow } else { $Green }
-    $segments.Add("${Dim}ctx $col$pct%$R")
+    $segments.Add("${Dim}ctx $(Format-ReiBar $pct $barW $col $barChar) $col$pct%$R")
 } else {
     $segments.Add("${Dim}ctx --$R")
+}
+
+# 4b) weekly usage (subscriptions only)
+$weekUsed = $j.rate_limits.seven_day.used_percentage
+if ($null -ne $weekUsed) {
+    $wp = [int][math]::Round([double]$weekUsed)
+    $wcol = if ($wp -ge 80) { $Red } elseif ($wp -ge 60) { $Yellow } else { $Green }
+    $segments.Add("${Dim}sem $(Format-ReiBar $wp $barW $wcol $barChar) $wcol$wp%$R")
 }
 
 # 5) next weekly reset (subscriptions only; resets_at is epoch SECONDS)

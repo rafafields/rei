@@ -1,0 +1,16 @@
+# Rei (零) - Alacritty keyboard and selection settings, tuned for Claude Code.
+# Optional: import it next to rei.toml.
+
+[selection]
+# Selecting text with the mouse copies it to the clipboard.
+save_to_clipboard = true
+
+[keyboard]
+bindings = [
+  # Shift+Enter inserts a new line in the Claude Code prompt (it reads ESC+Enter as "newline").
+  { key = "Return", mods = "Shift", chars = "\u001b\r" },
+  # Ctrl+Backspace deletes the previous word (Ctrl+W).
+  { key = "Back", mods = "Control", chars = "\u0017" },
+  # Ctrl+Delete deletes the next word (Alt+D).
+  { key = "Delete", mods = "Control", chars = "\u001bd" },
+]

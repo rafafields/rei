@@ -46,6 +46,8 @@ Everything except `projects` is optional.
 | `special` | built-in panel | An array to run your own command in the second window, or `false` for no second window. |
 | `statusLine` | `true` | `false` stops `rei` from passing its status line to Claude Code. |
 | `panel.system` | `true` | `false` hides memory and disk in the panel. |
+| `bar` | `"|"` | Character of the progress bars in the panel and the status line: `"|"` or `"/"`. |
+| `panel.sections` | git, ports, check, system | Which panel sections show and in what order. See [sections.md](sections.md). |
 | `panel.logo` | `config/logo.txt` | Path to a text file shown at the top of the panel. Hidden if the window is narrower than the file. |
 
 ## Layout

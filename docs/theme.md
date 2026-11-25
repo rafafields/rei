@@ -42,3 +42,17 @@ The theme does not set a font; Alacritty's default is used. Set one in your own 
 ## Example config
 
 `config/alacritty.toml` is a ready-to-copy file that imports the theme and sets window padding (12 x 10) and opacity (1.0).
+
+## Keys and selection (optional)
+
+`theme/keys.toml` is a separate file, imported the same way. It sets:
+
+| Key | Effect in Claude Code |
+|---|---|
+| Shift+Enter | New line in the prompt (sends ESC+Enter) |
+| Ctrl+Backspace | Delete previous word (sends Ctrl+W) |
+| Ctrl+Delete | Delete next word (sends Alt+D) |
+
+It also turns on `selection.save_to_clipboard`: selecting text with the mouse copies it.
+
+Alacritty has no keyboard selection outside vi mode (Ctrl+Shift+Space, then `v` to select and `y` to copy), so Ctrl+Shift+Arrow cannot select text.
