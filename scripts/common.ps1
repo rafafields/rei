@@ -37,20 +37,21 @@ function Get-ReiColors {
         Text   = (New-ReiAnsi 'e8e4d8'); Soft = (New-ReiAnsi 'c9c5b8'); Dim = (New-ReiAnsi '7d7d85')
         Accent = (New-ReiAnsi 'e0364a'); Bad = (New-ReiAnsi 'e0364a'); Warn = (New-ReiAnsi 'e8603c')
         Info   = (New-ReiAnsi 'ee8e72'); Branch = (New-ReiAnsi 'd4577a'); Ok = (New-ReiAnsi 'f2a0ae')
+        BarOn  = (New-ReiAnsi 'e0364a'); BarOff = (New-ReiAnsi '5c1a26')
     }
 }
 
-# Progress bar made of one ASCII character ('|' or '/'): filled part coloured, empty part dim.
-# The character comes from "bar" in the config (default '|').
+# Progress bar made of one character: a full block (default), '|' or '/'. Strong red on a soft red track.
+# The style comes from "bar" in the config: "block" (default), "|" or "/".
 function Get-ReiBarChar {
     try { $c = (Read-ReiConfig).bar } catch { $c = $null }
-    if ($c -eq '/') { '/' } else { '|' }
+    if ($c -eq '/') { '/' } elseif ($c -eq '|') { '|' } else { [string][char]0x2588 }
 }
-function Format-ReiBar([double]$Percent, [int]$Width, [string]$Color, [string]$Char = '|') {
+function Format-ReiBar([double]$Percent, [int]$Width, [string]$Char = [string][char]0x2588) {
     $Width = [math]::Max(3, $Width)
     $filled = [int][math]::Round($Width * [math]::Min(100, [math]::Max(0, $Percent)) / 100)
     $c = Get-ReiColors
-    "$Color$($Char * $filled)$($c.Dim)$($Char * ($Width - $filled))$($c.Reset)"
+    "$($c.BarOn)$($Char * $filled)$($c.BarOff)$($Char * ($Width - $filled))$($c.Reset)"
 }
 
 # Text helpers shared by the panel and its sections.

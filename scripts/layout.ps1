@@ -26,6 +26,11 @@ namespace Rei {
         [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
         [DllImport("dwmapi.dll")] static extern int DwmGetWindowAttribute(IntPtr hWnd, int attr, out RECT rect, int size);
 
+        [DllImport("user32.dll")] static extern bool IsWindow(IntPtr hWnd);
+        [DllImport("user32.dll")] static extern bool IsIconic(IntPtr hWnd);
+        public static bool Exists(IntPtr h) { return IsWindow(h); }
+        public static bool Minimized(IntPtr h) { return IsIconic(h); }
+
         public static void EnableDpiAwareness() { SetProcessDpiAwarenessContext(new IntPtr(-4)); }
 
         public static RECT WorkArea() {
@@ -70,14 +75,18 @@ namespace Rei {
 
 [Rei.Win32]::EnableDpiAwareness()
 
-function Get-ReiSlots([double]$ClaudeRatio = 0.75) {
+# $Gap pixels are left between the two windows for the draggable divider (0 = windows touch).
+function Get-ReiSlots([double]$ClaudeRatio = 0.75, [int]$Gap = 0) {
     $a = [Rei.Win32]::WorkArea()
     $width = $a.Right - $a.Left
     $height = $a.Bottom - $a.Top
     $left = [int][math]::Round($width * $ClaudeRatio)
+    $half = [int][math]::Floor($Gap / 2)
+    $rest = $Gap - $half
     [pscustomobject]@{
-        Claude = [pscustomobject]@{ X = $a.Left;         Y = $a.Top; W = $left;          H = $height }
-        Panel  = [pscustomobject]@{ X = $a.Left + $left; Y = $a.Top; W = $width - $left; H = $height }
+        Claude  = [pscustomobject]@{ X = $a.Left;                 Y = $a.Top; W = $left - $half;          H = $height }
+        Panel   = [pscustomobject]@{ X = $a.Left + $left + $rest; Y = $a.Top; W = $width - $left - $rest; H = $height }
+        Divider = [pscustomobject]@{ X = $a.Left + $left - $half; Y = $a.Top; W = $Gap;                   H = $height }
     }
 }
 

@@ -35,11 +35,11 @@ Return one of:
 |---|---|
 | `Name`, `Path` | Project name and folder. |
 | `Width` | Columns available for one line. No line may be wider (use `Cut`). |
-| `Colors` | `Text Soft Dim Accent Bad Warn Info Branch Ok Reset Bold`. Same palette as the rest of Rei. |
+| `Colors` | `Text Soft Dim Accent Bad Warn Info Branch Ok BarOn BarOff Reset Bold`. Same palette as the rest of Rei. |
 | `BarChar` | `|` or `/`, the user's progress bar character. |
 | `IsDev`, `ShowSystem`, `CheckCommand`, `CheckState` | Project facts the built-in sections use. |
 
-Available helpers: `Cut text width`, `CutLeft text width`, `Format-Ago date`, `Format-ReiBar percent width colour char`, `Get-ReiColors`.
+Available helpers: `Cut text width`, `CutLeft text width`, `Format-Ago date`, `Format-ReiBar percent width char` (strong red on a soft red track), `Get-ReiColors`.
 
 ## Rules (the panel enforces what it can)
 

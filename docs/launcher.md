@@ -43,10 +43,11 @@ Everything except `projects` is optional.
 | `projects[].check` | none | Command the panel runs when you press `c`. |
 | `projects[].dev` | auto | Force "development project" on or off. Auto-detected from `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `*.csproj` and similar files. |
 | `layout.claudeRatio` | `0.75` | Share of the work area for Claude Code (0.3 to 0.9). The panel gets the rest. |
+| `layout.divider` | `true` | `false` removes the draggable divider; the two windows then touch. |
 | `special` | built-in panel | An array to run your own command in the second window, or `false` for no second window. |
 | `statusLine` | `true` | `false` stops `rei` from passing its status line to Claude Code. |
 | `panel.system` | `true` | `false` hides memory and disk in the panel. |
-| `bar` | `"|"` | Character of the progress bars in the panel and the status line: `"|"` or `"/"`. |
+| `bar` | `"block"` | Progress bar style in the panel and the status line: `"block"` (full blocks), `"|"` or `"/"`. |
 | `panel.sections` | git, ports, check, system | Which panel sections show and in what order. See [sections.md](sections.md). |
 | `panel.logo` | `config/logo.txt` | Path to a text file shown at the top of the panel. Hidden if the window is narrower than the file. |
 
@@ -57,6 +58,10 @@ The work area of the primary monitor (the screen minus the taskbar) is split in 
 Alacritty creates a small helper window first and applies its own initial size a moment later, so the launcher waits for the real window and re-places it for about two seconds until the size settles.
 
 Windows are placed with the Win32 API from PowerShell (`scripts/layout.ps1`); nothing else needs to be installed.
+
+## Divider
+
+Between the two windows there is a 10 px strip (`scripts/splitter.ps1`, started by `rei`). Drag it and both windows resize together, between 30 % and 90 % for Claude Code. It is a separate small window, not a real split: it follows the pair (it stays in the gap if you move or resize one window by hand), hides while either window is minimized, never takes the keyboard focus, and exits when either window closes. Moving one window does not move the other.
 
 ## Several projects
 

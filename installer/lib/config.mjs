@@ -10,7 +10,7 @@ export function readConfig(repo) {
 /** Builds projects.json from answers; only non-default options are written. */
 export function buildConfig({ projects, ratio, system, statusLine, logo, bar }) {
   const cfg = {};
-  if (bar === '/') cfg.bar = '/';
+  if (bar === '/' || bar === '|') cfg.bar = bar;
   if (ratio !== 0.75) cfg.layout = { claudeRatio: ratio };
   if (statusLine === false) cfg.statusLine = false;
   const panel = {};

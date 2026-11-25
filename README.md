@@ -94,7 +94,8 @@ All options are in [docs/launcher.md](docs/launcher.md).
 ## Known limits
 
 - One screen: the layout uses the primary monitor's work area.
-- Launching several projects at once stacks their windows in the same place. Per-project virtual desktops are not implemented.
+- The divider is a separate window, not a real split: moving one window does not move the other.
+- Launching several projects at once stacks their windows in the same place, dividers included. Per-project virtual desktops are not implemented.
 - The panel only detects servers whose command line contains the project path.
 - The weekly reset in the status line only exists for claude.ai subscriptions.
 

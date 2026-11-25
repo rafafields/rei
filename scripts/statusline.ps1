@@ -67,7 +67,7 @@ $used = $j.context_window.used_percentage
 if ($null -ne $used) {
     $pct = [int][math]::Round([double]$used)
     $col = if ($pct -ge 80) { $Red } elseif ($pct -ge 60) { $Yellow } else { $Green }
-    $segments.Add("${Dim}ctx $(Format-ReiBar $pct $barW $col $barChar) $col$pct%$R")
+    $segments.Add("${Dim}ctx $(Format-ReiBar $pct $barW $barChar) $col$pct%$R")
 } else {
     $segments.Add("${Dim}ctx --$R")
 }
@@ -77,7 +77,7 @@ $weekUsed = $j.rate_limits.seven_day.used_percentage
 if ($null -ne $weekUsed) {
     $wp = [int][math]::Round([double]$weekUsed)
     $wcol = if ($wp -ge 80) { $Red } elseif ($wp -ge 60) { $Yellow } else { $Green }
-    $segments.Add("${Dim}sem $(Format-ReiBar $wp $barW $wcol $barChar) $wcol$wp%$R")
+    $segments.Add("${Dim}sem $(Format-ReiBar $wp $barW $barChar) $wcol$wp%$R")
 }
 
 # 5) next weekly reset (subscriptions only; resets_at is epoch SECONDS)

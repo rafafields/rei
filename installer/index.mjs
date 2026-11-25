@@ -83,8 +83,8 @@ async function main() {
 
   const keys = cancelled(await p.confirm({ message: 'Install Rei key bindings? (Shift+Enter new line, Ctrl+Backspace/Delete delete words, selection copies to clipboard)', initialValue: true }));
 
-  const bar = cancelled(await p.select({ message: 'Progress bar style (panel and status line)', initialValue: existing?.bar === '/' ? '/' : '|', options: [
-    { value: '|', label: '|||||||||| 60%' }, { value: '/', label: '////////// 60%' }] }));
+  const bar = cancelled(await p.select({ message: 'Progress bar style (panel and status line)', initialValue: ['/', '|'].includes(existing?.bar) ? existing.bar : 'block', options: [
+    { value: 'block', label: '██████░░░░ 60%  (blocks)' }, { value: '|', label: '||||||.... 60%' }, { value: '/', label: '//////.... 60%' }] }));
 
   // 4. summary
   const themeFile = path.join(repo, 'theme', 'rei.toml');

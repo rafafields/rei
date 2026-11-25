@@ -74,21 +74,38 @@ function Quote([string]$s) { if ($s -match '[\s"]') { '"' + ($s -replace '"', '\
 . (Join-Path $PSScriptRoot 'layout.ps1')
 $ratio = if ($config.layout -and $config.layout.claudeRatio) { [double]$config.layout.claudeRatio } else { 0.75 }
 if ($ratio -lt 0.3 -or $ratio -gt 0.9) { Fail "layout.claudeRatio must be between 0.3 and 0.9 (got $ratio)" }
+# Draggable divider between the two windows: on by default, "layout": { "divider": false } turns it off.
+$hasPanel = -not ($config.special -is [bool] -and -not $config.special)
+$wantDivider = -not ($config.layout -and $config.layout.divider -is [bool] -and -not $config.layout.divider)
+$gap = if ($hasPanel -and $wantDivider) { 10 } else { 0 }
 
 function Open-Window([string]$Title, [string]$Dir, [string[]]$Command, $Slot) {
     $argList = @('--title', $Title, '--working-directory', $Dir, '-e') + $Command
     $line = ($argList | ForEach-Object { Quote $_ }) -join ' '
     if ($DryRun) {
         Write-Host ("[dry-run] alacritty {0}`n          -> x={1} y={2} w={3} h={4}" -f $line, $Slot.X, $Slot.Y, $Slot.W, $Slot.H)
-        return
+        return $null
     }
     $proc = Start-Process -FilePath $alacritty -ArgumentList $line -PassThru
     $handle = Wait-ReiWindow $proc.Id
     if ($handle -eq [IntPtr]::Zero) {
         Write-Host "rei: window '$Title' did not appear in time; left unplaced." -ForegroundColor Yellow
-        return
+        return $null
     }
     Set-ReiWindowRect $handle $Slot
+    return $handle
+}
+
+# Starts the divider for a pair of windows. It exits by itself when either window closes.
+function Start-Divider($Left, $Right, $Slot) {
+    $script = Join-Path $PSScriptRoot 'splitter.ps1'
+    if ($DryRun) {
+        Write-Host ("[dry-run] divider between the two windows -> x={0} y={1} w={2} h={3}" -f $Slot.X, $Slot.Y, $Slot.W, $Slot.H)
+        return
+    }
+    if (-not $Left -or -not $Right) { return }
+    $argText = '-NoLogo -NoProfile -STA -WindowStyle Hidden -File "{0}" -Left {1} -Right {2} -Gap {3}' -f $script, $Left.ToInt64(), $Right.ToInt64(), $gap
+    Start-Process -FilePath 'powershell.exe' -ArgumentList $argText -WindowStyle Hidden | Out-Null
 }
 
 # --- Claude settings: Rei status line, only for sessions started by rei --------------
@@ -107,14 +124,14 @@ if (-not ($config.statusLine -is [bool] -and -not $config.statusLine)) {
 }
 
 # --- launch -----------------------------------------------------------------
-$slots = Get-ReiSlots $ratio
+$slots = Get-ReiSlots $ratio $gap
 foreach ($p in $selected) {
     if (-not (Test-Path -LiteralPath $p.path -PathType Container)) {
         Write-Host "rei: skipping '$($p.name)': directory does not exist: $($p.path)" -ForegroundColor Yellow
         continue
     }
     $dir = (Resolve-Path -LiteralPath $p.path).Path
-    Open-Window "Rei - $($p.name)" $dir $claudeCommand $slots.Claude
+    $claudeWindow = Open-Window "Rei - $($p.name)" $dir $claudeCommand $slots.Claude
     # "special": omitted = the built-in panel; an array = your own command; false = no second window.
     if ($config.special -is [bool] -and -not $config.special) { continue }
     $special = if ($config.special) {
@@ -122,5 +139,6 @@ foreach ($p in $selected) {
     } else {
         @('powershell.exe', '-NoLogo', '-NoProfile', '-File', (Join-Path $PSScriptRoot 'panel.ps1'), '-Name', $p.name)
     }
-    Open-Window "Rei panel - $($p.name)" $dir $special $slots.Panel
+    $panelWindow = Open-Window "Rei panel - $($p.name)" $dir $special $slots.Panel
+    if ($gap -gt 0) { Start-Divider $claudeWindow $panelWindow $slots.Divider }
 }
