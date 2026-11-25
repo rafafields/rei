@@ -19,6 +19,7 @@ Everything is wrapped in a dark theme where every colour that is not neutral is 
 | `scripts/rei.ps1` | The `rei` command: launches and places the windows | [docs/launcher.md](docs/launcher.md) |
 | `scripts/panel.ps1` | The right-hand panel | [docs/panel.md](docs/panel.md) |
 | `scripts/statusline.ps1` | Claude Code status line | [docs/statusline.md](docs/statusline.md) |
+| `installer/` | Interactive installer (Node) | [docs/installer.md](docs/installer.md) |
 
 ## Requirements
 
@@ -29,6 +30,14 @@ Everything is wrapped in a dark theme where every colour that is not neutral is 
 - Git
 
 ## Install
+
+With Node 18 or later, the assistant does all of the steps below ([docs/installer.md](docs/installer.md)):
+
+```powershell
+npx github:rafafields/rei
+```
+
+By hand:
 
 ```powershell
 git clone https://github.com/rafafields/rei.git C:\code\rei

@@ -1,3 +1,5 @@
 config/projects.json
 config/logo.txt
 config/claude-settings.json
+node_modules/
+*.bak-rei-*
