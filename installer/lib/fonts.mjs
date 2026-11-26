@@ -6,7 +6,9 @@ import { spawnSync } from 'node:child_process';
  */
 export const FONTS = [
   { id: 'default', label: 'Keep the Windows Terminal default', family: null },
-  { id: 'jetbrains', label: 'JetBrains Mono (Nerd Font)', family: 'JetBrainsMono Nerd Font', winget: 'DEVCOM.JetBrainsMonoNerdFont' },
+  { id: 'jetbrains', label: 'JetBrains Mono (Nerd Font)', family: 'JetBrainsMono Nerd Font', winget: 'DEVCOM.JetBrainsMonoNerdFont',
+    // Windows lists the Nerd Font v3 under its short names (NF, NFM, NFP), not the long one.
+    aliases: ['JetBrainsMono NF', 'JetBrainsMono NFM', 'JetBrainsMono NFP', 'JetBrainsMono Nerd Font Mono', 'JetBrainsMono Nerd Font Propo'] },
   { id: 'cascadia', label: 'Cascadia Code', family: 'Cascadia Code', manual: 'https://github.com/microsoft/cascadia-code/releases' },
   { id: 'consolas', label: 'Consolas', family: 'Consolas' },
   { id: 'other', label: 'Another font (type its name)', family: null },
@@ -21,7 +23,8 @@ export function installedFonts() {
   return new Set(r.stdout.split(/\r?\n/).map((s) => s.trim().toLowerCase()).filter(Boolean));
 }
 
-export const isInstalled = (families, family) => !families || [...families].some((f) => f === family.toLowerCase());
+/** `family` or any of its `aliases` is among the installed families (or the list is unknown). */
+export const isInstalled = (families, family, aliases = []) => !families || [family, ...aliases].some((n) => families.has(n.toLowerCase()));
 
 export const hasWinget = () => spawnSync('where.exe', ['winget'], { encoding: 'utf8' }).status === 0;
 

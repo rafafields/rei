@@ -53,7 +53,7 @@ async function askColour(message, initial) {
 
 async function askFont(prev) {
   const families = installedFonts();
-  const hint = (f) => (f.family === null ? undefined : isInstalled(families, f.family) ? 'installed' : f.winget ? 'not installed, can be installed with winget' : 'not installed');
+  const hint = (f) => (f.family === null ? undefined : isInstalled(families, f.family, f.aliases) ? 'installed' : f.winget ? 'not installed, can be installed with winget' : 'not installed');
   const prevId = prev?.family ? (FONTS.find((f) => f.family === prev.family)?.id ?? 'other') : 'default';
   const id = cancelled(await p.select({ message: 'Terminal font', initialValue: prevId, options: FONTS.map((f) => ({ value: f.id, label: f.label, hint: hint(f) })) }));
   let font = FONTS.find((f) => f.id === id);
@@ -62,7 +62,7 @@ async function askFont(prev) {
     font = { id, label: family, family };
   }
   let install = null;
-  if (font.family && !isInstalled(families, font.family)) {
+  if (font.family && !isInstalled(families, font.family, font.aliases)) {
     if (font.winget && hasWinget()) {
       if (cancelled(await p.confirm({ message: `${font.family} is not installed. Install it with winget (${font.winget})?`, initialValue: true }))) install = font;
     } else {

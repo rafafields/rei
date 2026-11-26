@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { makeMapper, normaliseHex, panelColors, contrast, retintTheme } from '../lib/palette.mjs';
+import { isInstalled, FONTS } from '../lib/fonts.mjs';
 import { buildConfig } from '../lib/config.mjs';
 import { buildFragment, panelFontSize } from '../lib/theme.mjs';
 
@@ -86,4 +87,12 @@ test('the Rei Panel profile has a smaller font than Rei', () => {
   assert.equal(panelFontSize(6), 6);
   const plain = JSON.parse(buildFragment(base, makeMapper({}), {}));
   assert.deepEqual(plain.profiles[1].font, { size: 10 });
+});
+
+test('the JetBrains Nerd Font is found under its v3 short names', () => {
+  const jb = FONTS.find((f) => f.id === 'jetbrains');
+  const families = new Set(['jetbrainsmono nf', 'consolas']);
+  assert.ok(isInstalled(families, jb.family, jb.aliases));
+  assert.ok(!isInstalled(families, jb.family));
+  assert.ok(!isInstalled(new Set(['consolas']), jb.family, jb.aliases));
 });
