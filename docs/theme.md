@@ -1,11 +1,8 @@
 # Theme
 
-`theme/rei.toml` is a plain Alacritty colour file. It sets only colours (no font, no window options), so it can be imported next to any existing config:
+`theme/rei.json` is a Windows Terminal colour scheme named "Rei". The installer does not edit your `settings.json`: it writes a *fragment*, `%LOCALAPPDATA%\Microsoft\Windows Terminal\Fragments\rei\rei.json`, with a profile "Rei" (PowerShell, padding 12 x 10, your font) and the scheme. Restart Windows Terminal once so it picks it up. `rei` opens its tabs with `-p Rei`.
 
-```toml
-[general]
-import = ["C:/code/rei/theme/rei.toml"]
-```
+To use the colours in your own profile, copy the scheme from `theme/rei.json` into the `schemes` list of your `settings.json` and set `"colorScheme": "Rei"`.
 
 ## Palette
 
@@ -37,22 +34,8 @@ Every text colour has a contrast ratio of at least 4.5:1 against the background.
 
 ## Font
 
-`theme/rei.toml` does not set a font; Alacritty's default is used. The installer can pick one for you (and install it with `winget` when it is available there): it then writes `config/theme.toml`, a copy of this theme with your colours and a `[font]` section, and imports that instead. Or set one yourself in your own config under `[font.normal]`.
+The Rei profile uses Windows Terminal's default font until you choose one. The installer can pick one for you (and install it with `winget` when it is available there): it writes it to the profile in the fragment as `font.face` and `font.size`.
 
-## Example config
+## Keys and selection
 
-`config/alacritty.toml` is a ready-to-copy file that imports the theme and sets window padding (12 x 10) and opacity (1.0).
-
-## Keys and selection (optional)
-
-`theme/keys.toml` is a separate file, imported the same way. It sets:
-
-| Key | Effect in Claude Code |
-|---|---|
-| Shift+Enter | New line in the prompt (sends ESC+Enter) |
-| Ctrl+Backspace | Delete previous word (sends Ctrl+W) |
-| Ctrl+Delete | Delete next word (sends Alt+D) |
-
-It also turns on `selection.save_to_clipboard`: selecting text with the mouse copies it.
-
-Alacritty has no keyboard selection outside vi mode (Ctrl+Shift+Space, then `v` to select and `y` to copy), so Ctrl+Shift+Arrow cannot select text.
+The Alacritty key bindings (Shift+Enter, Ctrl+Backspace, Ctrl+Delete) are not part of Rei any more: a fragment cannot define key bindings. Windows Terminal's own settings, or Claude Code's `/terminal-setup`, are the place for them.

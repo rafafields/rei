@@ -1,21 +1,19 @@
 import { spawnSync } from 'node:child_process';
-import fs from 'node:fs';
 
 export function onPath(cmd) {
   const r = spawnSync('where.exe', [cmd], { encoding: 'utf8' });
   return r.status === 0 ? r.stdout.split(/\r?\n/)[0].trim() : null;
 }
 
-export function findAlacritty() {
-  return onPath('alacritty') ||
-    ['C:/Program Files/Alacritty/alacritty.exe'].find((p) => fs.existsSync(p)) || null;
+export function findWindowsTerminal() {
+  return onPath('wt') || null;
 }
 
 /** Each requirement: how to detect it and what to tell the user when missing. */
 export function checkRequirements() {
   return [
     { name: 'Windows', ok: process.platform === 'win32', help: 'Rei only works on Windows 10/11.' },
-    { name: 'Alacritty', ok: !!findAlacritty(), help: 'winget install Alacritty.Alacritty' },
+    { name: 'Windows Terminal', ok: !!findWindowsTerminal(), help: 'winget install Microsoft.WindowsTerminal' },
     { name: 'PowerShell 5.1', ok: !!onPath('powershell'), help: 'Included with Windows.' },
     { name: 'Claude Code', ok: !!onPath('claude'), help: 'npm install -g @anthropic-ai/claude-code' },
     { name: 'git', ok: !!onPath('git'), help: 'winget install Git.Git' },

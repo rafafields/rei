@@ -1,0 +1,23 @@
+{
+  "name": "Rei",
+  "background": "#0a0a0b",
+  "foreground": "#e8e4d8",
+  "cursorColor": "#e0364a",
+  "selectionBackground": "#4a1520",
+  "black": "#1a1a1d",
+  "red": "#e0364a",
+  "green": "#39ff14",
+  "yellow": "#ee8e72",
+  "blue": "#d4577a",
+  "purple": "#cc4a7e",
+  "cyan": "#f2a0ae",
+  "white": "#c9c5b8",
+  "brightBlack": "#7d7d85",
+  "brightRed": "#ff5468",
+  "brightGreen": "#7cff63",
+  "brightYellow": "#ffab8c",
+  "brightBlue": "#ec7f9e",
+  "brightPurple": "#e0679a",
+  "brightCyan": "#f8c0c8",
+  "brightWhite": "#f4f0e4"
+}

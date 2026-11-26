@@ -1,6 +1,6 @@
 # Panel
 
-`scripts/panel.ps1 -Name <project>` is the narrow window that `rei` opens next to Claude Code. It repaints in place on the terminal's alternate screen using absolute cursor positioning, so it never scrolls, and it rewrites only the lines that changed.
+`scripts/panel.ps1 -Name <project>` is the narrow pane that `rei` opens next to Claude Code. It repaints in place on the terminal's alternate screen using absolute cursor positioning, so it never scrolls, and it rewrites only the lines that changed.
 
 ## How it is built
 
@@ -31,7 +31,7 @@ Labels in the panel are in Spanish.
 
 ## Refresh
 
-Each section refreshes on its own interval (git and memory every 5 seconds, ports every 10, check every second; `every` in the config overrides it). The clock line updates every second. Resizing the window forces a full repaint.
+Each section refreshes on its own interval (git and memory every 5 seconds, ports every 10, check every second; `every` in the config overrides it). The clock line updates every second. Resizing the pane forces a full repaint.
 
 ## Keys
 
@@ -49,7 +49,7 @@ Shared with the status line (`Get-ReiColors` in `scripts/common.ps1`): light pin
 ## Limits
 
 - A server is only detected if its command line includes the project path. A `npm run dev` started from the project folder usually does not.
-- The panel is built for a narrow window (about 40 columns). It truncates long values with an ellipsis.
+- The panel is built for a narrow pane (about 40 columns). It truncates long values with an ellipsis.
 
 ## Testing without a terminal
 

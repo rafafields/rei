@@ -5,13 +5,12 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { checkRequirements, powershell, profilePath } from './lib/system.mjs';
-import { alacrittyConfigPath, addImport, removeImport, backup } from './lib/alacritty.mjs';
 import { readConfig, buildConfig, writeConfig } from './lib/config.mjs';
 import { uninstallBlock, hasBlock, installScript } from './lib/profile.mjs';
 import { DEFAULT_PRIMARY, makeMapper, normaliseHex, panelColors, swatch } from './lib/palette.mjs';
 import { FONTS, installedFonts, isInstalled, hasWinget, wingetInstall } from './lib/fonts.mjs';
 import { LOGOS, currentLogo, logoFile, presetFile, widthOf, colourise } from './lib/logo.mjs';
-import { baseThemeFile, generatedThemeFile, writeTheme } from './lib/theme.mjs';
+import { fragmentFile, writeFragment, removeFragment } from './lib/theme.mjs';
 
 const args = new Set(process.argv.slice(2));
 const DRY = args.has('--dry-run');
@@ -64,7 +63,7 @@ async function askFont(prev) {
     if (font.winget && hasWinget()) {
       if (cancelled(await p.confirm({ message: `${font.family} is not installed. Install it with winget (${font.winget})?`, initialValue: true }))) install = font;
     } else {
-      p.log.warn(`${font.family} is not installed${font.manual ? `: get it from ${font.manual}` : ''}. Alacritty will use its default font until it is.`);
+      p.log.warn(`${font.family} is not installed${font.manual ? `: get it from ${font.manual}` : ''}. Windows Terminal will use its default font until it is.`);
     }
   }
   const size = String(cancelled(await p.text({
@@ -153,24 +152,16 @@ async function main() {
   let newLogo = null;
   if (opts.logo) newLogo = await askLogo(repo, existing, mapper.primary);
 
-  const keys = cancelled(await p.confirm({ message: 'Install Rei key bindings? (Shift+Enter new line, Ctrl+Backspace/Delete delete words, selection copies to clipboard)', initialValue: true }));
-
   const bar = cancelled(await p.select({ message: 'Progress bar style (panel and status line)', initialValue: ['/', '|'].includes(existing?.bar) ? existing.bar : 'block', options: [
     { value: 'block', label: '██████░░░░ 60%  (blocks)' }, { value: '|', label: '||||||.... 60%' }, { value: '/', label: '//////.... 60%' }] }));
 
   // 7. summary
-  const baseTheme = baseThemeFile(repo);
-  const genTheme = generatedThemeFile(repo);
-  const keysFile = path.join(repo, 'theme', 'keys.toml');
-  const alaFile = alacrittyConfigPath();
-  const customTheme = mapper.primary !== DEFAULT_PRIMARY || !!secondary || !!font.family || !!font.size;
-  const themeFile = customTheme ? genTheme : baseTheme;
+  const fragFile = fragmentFile();
   const plan = [
     `Write ${path.join(repo, 'config', 'projects.json')} (${projects.length} project(s))`,
-    ...(customTheme ? [`Generate ${genTheme} with your colours${font.family || font.size ? ' and font' : ''}`] : []),
+    `Write the Windows Terminal profile and colour scheme "Rei" to ${fragFile}${font.family || font.size ? ' (with your font)' : ''}`,
     ...(font.install ? [`Install the font ${font.install.family} with winget`] : []),
     ...(newLogo ? [`Write the logo to ${logoFile(repo)}`] : []),
-    `${fs.existsSync(alaFile) ? 'Add the theme import to' : 'Create'} ${alaFile}${fs.existsSync(alaFile) ? ' (backup first)' : ''}`,
     `${hasBlock(profilePath() || '') ? 'Update' : 'Add'} the rei function in your PowerShell profile`,
   ];
   p.note(plan.map((l) => `• ${l}`).join('\n'), DRY ? 'Would do (dry run)' : 'About to do');
@@ -180,26 +171,19 @@ async function main() {
   // 8. apply
   if (font.install) {
     p.log.step(`Installing ${font.install.family} with winget`);
-    if (!wingetInstall(font.install.winget)) p.log.warn('winget could not install the font. The theme still uses it; install it by hand and restart Alacritty.');
+    if (!wingetInstall(font.install.winget)) p.log.warn('winget could not install the font. The profile still uses it; install it by hand and restart Windows Terminal.');
   }
   const s = p.spinner();
   s.start('Applying');
+  const customTheme = mapper.primary !== DEFAULT_PRIMARY || !!secondary || !!font.family || !!font.size;
   const theme = customTheme ? { primary: mapper.primary, ...(secondary ? { secondary } : {}), ...(font.family || font.size ? { font: { ...(font.family ? { family: font.family } : {}), ...(font.size ? { size: font.size } : {}) } } : {}) } : null;
   if (newLogo) { fs.mkdirSync(path.dirname(logoFile(repo)), { recursive: true }); fs.writeFileSync(logoFile(repo), newLogo.text + '\n', 'utf8'); }
   writeConfig(repo, buildConfig(existing, { projects, ...opts, resetLogoPath: !!newLogo, bar, colors: customTheme ? panelColors(mapper) : null, theme }));
-  if (customTheme) writeTheme(repo, mapper, { family: font.family, size: font.size });
-  const old = fs.existsSync(alaFile) ? fs.readFileSync(alaFile, 'utf8') : '';
-  let next = addImport(removeImport(removeImport(old, baseTheme), genTheme), themeFile);
-  next = keys ? addImport(next, keysFile) : removeImport(next, keysFile);
-  if (next !== old) {
-    const b = backup(alaFile);
-    fs.mkdirSync(path.dirname(alaFile), { recursive: true });
-    fs.writeFileSync(alaFile, next, 'utf8');
-    if (b) p.log.info(`Backup: ${b}`);
-  }
+  writeFragment(repo, mapper, { family: font.family, size: font.size });
   const ps = powershell(['-File', installScript(repo)]);
   s.stop(ps.status === 0 ? 'Done' : 'Finished with a profile error');
   if (ps.status !== 0) p.log.error((ps.stderr || ps.stdout).trim());
+  p.log.info('If Windows Terminal is open, close it completely and open it again so it loads the Rei profile.');
 
   // 9. Claude Code
   p.log.success('Open a new PowerShell window and run: rei');
@@ -255,22 +239,16 @@ async function locateRepo() {
 }
 
 async function uninstall(repo) {
-  const alaFile = alacrittyConfigPath();
   const prof = profilePath();
   const plan = [
-    `Remove the Rei imports (theme, generated theme, keys) from ${alaFile}`,
+    `Remove the Rei profile and colour scheme (${fragmentFile()})`,
     `Remove the rei block from ${prof}`,
     `Keep ${repo} and config/projects.json (your data)`,
   ];
   p.note(plan.map((l) => `• ${l}`).join('\n'), DRY ? 'Would do (dry run)' : 'About to do');
   if (DRY) { p.outro('Dry run: nothing was changed.'); return; }
   if (!cancelled(await p.confirm({ message: 'Uninstall Rei?', initialValue: false }))) { p.cancel('Nothing was changed.'); return; }
-  if (fs.existsSync(alaFile)) {
-    const old = fs.readFileSync(alaFile, 'utf8');
-    let next = old;
-    for (const f of [baseThemeFile(repo), generatedThemeFile(repo), path.join(repo, 'theme', 'keys.toml')]) next = removeImport(next, f);
-    if (next !== old) { const b = backup(alaFile); fs.writeFileSync(alaFile, next, 'utf8'); if (b) p.log.info(`Backup: ${b}`); }
-  }
+  removeFragment();
   if (prof) uninstallBlock(prof);
   p.outro(`Uninstalled. Delete ${repo} yourself if you want it gone, and open a new PowerShell window.`);
 }

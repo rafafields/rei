@@ -81,7 +81,7 @@ export function makeMapper({ primary = DEFAULT_PRIMARY, secondary = null } = {})
   return { map, primary: primaryOk, adjusted: primaryOk !== p };
 }
 
-/** Rewrites every #rrggbb in an Alacritty theme through the mapper. */
+/** Rewrites every #rrggbb in a theme file through the mapper. */
 export function retintTheme(text, mapper) {
   return text.replace(/#([0-9a-fA-F]{6})\b/g, (_, hex) => `#${mapper.map(hex.toLowerCase())}`);
 }

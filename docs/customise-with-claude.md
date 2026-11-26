@@ -16,4 +16,4 @@ Goal: make the right-hand panel show what *this* user wants to see, without brea
 8. **Offer the rest**, once: palette (`rei -Customize` asks for main and secondary colours; by hand, `theme/rei.toml` and `scripts/common.ps1` kept in sync), status line segments (`scripts/statusline.ps1`), logo (`config/logo.txt`).
 9. **Finish with a short list**: the files you created or changed, and how to undo each (delete the file in `config/widgets/` and remove its name from `panel.sections`).
 
-Never edit `scripts/panel.ps1` or `scripts/sections.ps1` to add a section, never touch the Alacritty config or the PowerShell profile (the installer does that), and never commit `config/`.
+Never edit `scripts/panel.ps1` or `scripts/sections.ps1` to add a section, never touch the Windows Terminal settings, the Rei fragment or the PowerShell profile (the installer does that), and never commit `config/`.

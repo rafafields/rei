@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
  * source (checked with `winget show --id <id> --exact`); the others are installed by hand.
  */
 export const FONTS = [
-  { id: 'default', label: 'Keep Alacritty default', family: null },
+  { id: 'default', label: 'Keep the Windows Terminal default', family: null },
   { id: 'jetbrains', label: 'JetBrains Mono (Nerd Font)', family: 'JetBrainsMono Nerd Font', winget: 'DEVCOM.JetBrainsMonoNerdFont' },
   { id: 'cascadia', label: 'Cascadia Code', family: 'Cascadia Code', manual: 'https://github.com/microsoft/cascadia-code/releases' },
   { id: 'consolas', label: 'Consolas', family: 'Consolas' },
@@ -28,12 +28,4 @@ export const hasWinget = () => spawnSync('where.exe', ['winget'], { encoding: 'u
 export function wingetInstall(id) {
   return spawnSync('winget', ['install', '--id', id, '--exact', '--source', 'winget',
     '--accept-package-agreements', '--accept-source-agreements'], { stdio: 'inherit' }).status === 0;
-}
-
-/** Pure: the Alacritty font section for the generated theme. */
-export function fontToml({ family, size }) {
-  const lines = [];
-  if (size) lines.push('[font]', `size = ${size}`, '');
-  if (family) lines.push('[font.normal]', `family = ${JSON.stringify(family)}`, '');
-  return lines.length ? `\n# Font chosen in the Rei installer\n${lines.join('\n')}` : '';
 }

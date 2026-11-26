@@ -1,6 +1,6 @@
 # Launcher and layout
 
-`scripts/rei.ps1` is the `rei` command. For each selected project it opens two Alacritty windows in the project's directory and places them side by side.
+`scripts/rei.ps1` is the `rei` command. For each selected project it opens one Windows Terminal window with a tab per project. Each tab is named after its project and holds two panes in the project's directory: Claude Code on the left and the panel on the right.
 
 ## Command line
 
@@ -15,13 +15,13 @@ rei -Config | -Customize | -Uninstall | -Help
 | `name ...` | Launch these projects. An unknown name fails and lists the known ones. |
 | `-All` | Launch every project in the list. |
 | `-List` | Print the list. A `!` marks a directory that does not exist. |
-| `-DryRun` | Print the commands and target rectangles; launch nothing. |
+| `-DryRun` | Print the `wt` command line it would run; launch nothing. |
 | `-Config` | Change your current directory to the folder Rei is installed in (the `rei` function in your profile does this; run as a script it prints the path and opens it in Explorer). |
 | `-Customize` | Run the installer again (`installer/index.mjs --customize`): projects, colours, font, logo and panel options, with your current values as defaults. Needs Node. |
 | `-Uninstall` | Run the uninstaller (`--uninstall`): removes the theme imports and the profile block, keeps the folder and your projects. |
 | `-Help` | Print this list of commands. |
 
-A project whose directory does not exist is skipped with a warning. If Alacritty or `claude` cannot be found, the command stops with a message.
+A project whose directory does not exist is skipped with a warning. If Windows Terminal (`wt`) or `claude` cannot be found, the command stops with a message.
 
 ## Configuration file
 
@@ -44,12 +44,12 @@ Everything except `projects` is optional.
 | Key | Default | Meaning |
 |---|---|---|
 | `projects[].name` | required | Name used on the command line. |
-| `projects[].path` | required | Working directory for both windows. |
+| `projects[].path` | required | Working directory for both panes. |
 | `projects[].check` | none | Command the panel runs when you press `c`. |
 | `projects[].dev` | auto | Force "development project" on or off. Auto-detected from `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `*.csproj` and similar files. |
-| `layout.claudeRatio` | `0.75` | Share of the work area for Claude Code (0.3 to 0.9). The panel gets the rest. |
-| `layout.divider` | `true` | `false` removes the draggable divider; the two windows then touch. |
-| `special` | built-in panel | An array to run your own command in the second window, or `false` for no second window. |
+| `layout.claudeRatio` | `0.75` | Share of the tab for Claude Code (0.3 to 0.9). The panel gets the rest. |
+| `layout.maximized` | `true` | `false` opens the window at Windows Terminal's default size instead of maximized. |
+| `special` | built-in panel | An array to run your own command in the second pane, or `false` for no second pane. |
 | `statusLine` | `true` | `false` stops `rei` from passing its status line to Claude Code. |
 | `panel.system` | `true` | `false` hides memory and disk in the panel. |
 | `bar` | `"block"` | Progress bar style in the panel and the status line: `"block"` (full blocks), `"|"` or `"/"`. |
@@ -60,19 +60,19 @@ Everything except `projects` is optional.
 
 ## Layout
 
-The work area of the primary monitor (the screen minus the taskbar) is split in physical pixels: Claude Code on the left, the panel on the right. The invisible resize borders that Windows 11 adds around windows are compensated so the visible frames touch.
+`rei` builds a single `wt` command line and starts it:
 
-Alacritty creates a small helper window first and applies its own initial size a moment later, so the launcher waits for the real window and re-places it for about two seconds until the size settles.
+```
+wt -w new --maximized new-tab -p Rei --title <name> --suppressApplicationTitle -d <dir> claude --settings <file> ; split-pane -V -s 0.25 ... panel.ps1 -Name <name> ; move-focus left ; ... ; focus-tab -t 0
+```
 
-Windows are placed with the Win32 API from PowerShell (`scripts/layout.ps1`); nothing else needs to be installed.
+- `-w new`: every `rei` command opens its own window; the projects of one command are tabs of that window.
+- `--title <name>` with `--suppressApplicationTitle`: the tab label is the project name, and neither Claude Code nor the panel renames it.
+- `split-pane -V -s 0.25`: the panel is a native vertical split with the share left by `layout.claudeRatio`. Drag the divider with the mouse; `Alt+Shift+Arrows` resizes it from the keyboard.
+- `-p Rei`: the profile installed by the installer (colours, font, padding), used only if the fragment exists.
+- After the tabs are created, the first one is focused and the cursor is in Claude Code in every tab.
 
-## Divider
-
-Between the two windows there is a 10 px strip (`scripts/splitter.ps1`, started by `rei`). Drag it and both windows resize together, between 30 % and 90 % for Claude Code. It is a separate small window, not a real split: it follows the pair (it stays in the gap if you move or resize one window by hand), hides while either window is minimized, never takes the keyboard focus, and exits when either window closes. Moving one window does not move the other.
-
-## Several projects
-
-Each project gets its own pair, but all pairs are placed in the same rectangles, so the last one launched ends up on top. Switch with Alt+Tab. Giving each project its own virtual desktop is not implemented: Windows has no public API for it.
+`claude` is started from its full path (`Get-Command claude`), so it also works when it is a `.exe` outside the profile's `PATH`.
 
 ## Install the command
 
