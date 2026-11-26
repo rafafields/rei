@@ -4,3 +4,4 @@ config/claude-settings.json
 node_modules/
 *.bak-rei-*
 config/widgets/
+config/theme.toml

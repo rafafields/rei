@@ -1,14 +1,20 @@
 <#
 .SYNOPSIS
   Adds the `rei` function to your PowerShell profile (idempotent).
+  `rei -Config` is handled by the function itself so it can change your current directory.
 #>
 $ErrorActionPreference = 'Stop'
 $script = (Resolve-Path (Join-Path $PSScriptRoot 'rei.ps1')).Path
 $begin = '# >>> rei >>>'
 $end = '# <<< rei <<<'
+$root = Split-Path -Parent (Split-Path -Parent $script)
+$q = { param($t) $t -replace "'", "''" }
 $block = @"
 $begin
-function rei { & '$script' @args }
+function rei {
+    if (`$args.Count -eq 1 -and `$args[0] -eq '-Config') { Set-Location -LiteralPath '$(& $q $root)'; return }
+    & '$(& $q $script)' @args
+}
 $end
 "@
 if (-not (Test-Path -LiteralPath $PROFILE)) {

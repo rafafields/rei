@@ -46,9 +46,13 @@ $barChar = Get-ReiBarChar
 
 $panelCfg = $config.panel
 $showSystem = -not ($panelCfg -and $panelCfg.system -is [bool] -and -not $panelCfg.system)
-$logoPath = if ($panelCfg -and $panelCfg.logo) { [string]$panelCfg.logo } else { Join-Path $PSScriptRoot '..\config\logo.txt' }
+# Logo: "panel.logo" = a path; null (or empty) turns it off; unset = config/logo.txt, else the default in theme/logos.
+$logoOff = $panelCfg -and $panelCfg.PSObject.Properties['logo'] -and [string]::IsNullOrWhiteSpace([string]$panelCfg.logo)
+$logoPath = if ($panelCfg -and $panelCfg.logo) { [string]$panelCfg.logo }
+            elseif (Test-Path -LiteralPath (Join-Path $PSScriptRoot '..\config\logo.txt')) { Join-Path $PSScriptRoot '..\config\logo.txt' }
+            else { Join-Path $PSScriptRoot '..\theme\logos\rei-braille.txt' }
 $logoLines = @()
-if (Test-Path -LiteralPath $logoPath) { $logoLines = @(Get-Content -LiteralPath $logoPath -Encoding UTF8 | ForEach-Object { $_.TrimEnd() }) }
+if (-not $logoOff -and (Test-Path -LiteralPath $logoPath)) { $logoLines = @(Get-Content -LiteralPath $logoPath -Encoding UTF8 | ForEach-Object { $_.TrimEnd() }) }
 $logoWidth = if ($logoLines.Count) { ($logoLines | Measure-Object -Property Length -Maximum).Maximum } else { 0 }
 
 # Dev project: explicit "dev" in the project entry, else detected from common marker files.

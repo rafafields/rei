@@ -24,7 +24,8 @@ function Read-ReiConfig {
     $config
 }
 
-# Palette shared by the panel and the status line (same hex values as theme/rei.toml).
+# Palette shared by the panel and the status line (same hex values as theme/rei.toml; the installer can
+# override them with "colors" in config/projects.json).
 # Everything that is not neutral is a shade of red; meaning is carried by lightness and hue:
 #   Ok = blush (light pink), Info = coral, Warn = vermilion, Bad = crimson, Accent = crimson, Branch = rose.
 function New-ReiAnsi([string]$Hex) {
@@ -32,13 +33,24 @@ function New-ReiAnsi([string]$Hex) {
     "$([char]27)[38;2;$r;$g;${b}m"
 }
 function Get-ReiColors {
-    @{
+    $c = @{
         Reset  = "$([char]27)[0m"; Bold = "$([char]27)[1m"
         Text   = (New-ReiAnsi 'e8e4d8'); Soft = (New-ReiAnsi 'c9c5b8'); Dim = (New-ReiAnsi '7d7d85')
         Accent = (New-ReiAnsi 'e0364a'); Bad = (New-ReiAnsi 'e0364a'); Warn = (New-ReiAnsi 'e8603c')
         Info   = (New-ReiAnsi 'ee8e72'); Branch = (New-ReiAnsi 'd4577a'); Ok = (New-ReiAnsi 'f2a0ae')
         BarOn  = (New-ReiAnsi 'e0364a'); BarOff = (New-ReiAnsi '5c1a26')
     }
+    # "colors" in the config (written by the installer) replaces the defaults above, key by key.
+    $custom = $null
+    try { $custom = (Read-ReiConfig).colors } catch { }
+    if ($custom) {
+        $names = @{ accent = 'Accent'; bad = 'Bad'; warn = 'Warn'; info = 'Info'; branch = 'Branch'; ok = 'Ok'; barOn = 'BarOn'; barOff = 'BarOff' }
+        foreach ($key in $names.Keys) {
+            $hex = [string]$custom.$key
+            if ($hex -match '^#?([0-9a-fA-F]{6})$') { $c[$names[$key]] = New-ReiAnsi $Matches[1] }
+        }
+    }
+    $c
 }
 
 # Progress bar made of one character: a full block (default), '|' or '/'. Strong red on a soft red track.

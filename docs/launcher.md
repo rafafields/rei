@@ -6,6 +6,7 @@
 
 ```
 rei [name ...] [-All] [-List] [-DryRun]
+rei -Config | -Customize | -Uninstall | -Help
 ```
 
 | Argument | Effect |
@@ -15,6 +16,10 @@ rei [name ...] [-All] [-List] [-DryRun]
 | `-All` | Launch every project in the list. |
 | `-List` | Print the list. A `!` marks a directory that does not exist. |
 | `-DryRun` | Print the commands and target rectangles; launch nothing. |
+| `-Config` | Change your current directory to the folder Rei is installed in (the `rei` function in your profile does this; run as a script it prints the path and opens it in Explorer). |
+| `-Customize` | Run the installer again (`installer/index.mjs --customize`): projects, colours, font, logo and panel options, with your current values as defaults. Needs Node. |
+| `-Uninstall` | Run the uninstaller (`--uninstall`): removes the theme imports and the profile block, keeps the folder and your projects. |
+| `-Help` | Print this list of commands. |
 
 A project whose directory does not exist is skipped with a warning. If Alacritty or `claude` cannot be found, the command stops with a message.
 
@@ -49,7 +54,9 @@ Everything except `projects` is optional.
 | `panel.system` | `true` | `false` hides memory and disk in the panel. |
 | `bar` | `"block"` | Progress bar style in the panel and the status line: `"block"` (full blocks), `"|"` or `"/"`. |
 | `panel.sections` | git, ports, check, system | Which panel sections show and in what order. See [sections.md](sections.md). |
-| `panel.logo` | `config/logo.txt` | Path to a text file shown at the top of the panel. Hidden if the window is narrower than the file. |
+| `panel.logo` | `config/logo.txt`, else `theme/logos/rei-braille.txt` | Path to a text file shown at the top of the panel. `null` turns the logo off. Hidden if the window is narrower than the file. |
+| `colors` | Rei reds | Colours of the panel and status line (`accent`, `bad`, `warn`, `info`, `branch`, `ok`, `barOn`, `barOff`, hex without `#`). Written by the installer from the main and secondary colours you pick; you can edit them by hand. |
+| `theme` | none | What the installer chose (`primary`, `secondary`, `font.family`, `font.size`), kept so `rei -Customize` can offer it again. |
 
 ## Layout
 

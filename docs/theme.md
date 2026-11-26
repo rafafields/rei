@@ -37,7 +37,7 @@ Every text colour has a contrast ratio of at least 4.5:1 against the background.
 
 ## Font
 
-The theme does not set a font; Alacritty's default is used. Set one in your own config under `[font.normal]` if you want something else.
+`theme/rei.toml` does not set a font; Alacritty's default is used. The installer can pick one for you (and install it with `winget` when it is available there): it then writes `config/theme.toml`, a copy of this theme with your colours and a `[font]` section, and imports that instead. Or set one yourself in your own config under `[font.normal]`.
 
 ## Example config
 

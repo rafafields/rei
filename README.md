@@ -73,6 +73,10 @@ rei my-project           # one project, by name
 rei -All                 # every project in the list
 rei -List                # show the list
 rei my-project -DryRun   # print what would run, launch nothing
+rei -Config              # go to the folder where Rei is installed
+rei -Customize           # run the installer again: colours, font, logo, projects...
+rei -Uninstall           # remove Rei from Alacritty and your PowerShell profile
+rei -Help                # list the commands
 ```
 
 Keys in the panel: `c` runs the project's check (if it has one), `q` or `Esc` quits.

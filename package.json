@@ -6,7 +6,16 @@
   "private": true,
   "license": "MIT",
   "repository": "github:rafafields/rei",
-  "bin": { "rei-install": "installer/index.mjs" },
-  "engines": { "node": ">=18" },
-  "dependencies": { "@clack/prompts": "^0.11.0" }
+  "bin": {
+    "rei-install": "installer/index.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.11.0"
+  },
+  "scripts": {
+    "test": "node --test installer/test/installer.test.mjs"
+  }
 }

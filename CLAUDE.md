@@ -6,10 +6,10 @@ Rei (零) is a terminal workspace for Windows: Alacritty + Claude Code on the le
 
 | Request | Where |
 |---|---|
-| Colours / palette | `theme/rei.toml` (Alacritty) **and** `scripts/common.ps1` (panel and status line). Keep both in sync. Every non-neutral colour is a shade of red unless the user says otherwise. |
+| Colours / palette | `theme/rei.toml` (Alacritty) **and** `scripts/common.ps1` (panel and status line). Keep both in sync. If `config/theme.toml` or `colors` in `config/projects.json` exist, the installer generated them from the user's choice (`rei -Customize` regenerates them): change those, or tell the user to re-run it. Every non-neutral colour is a shade of red unless the user says otherwise. |
 | What the panel shows | Add or edit a **section** in `config/widgets/` and list it in `panel.sections`. Read `docs/sections.md` first and follow its rules. Never edit `scripts/panel.ps1` or `scripts/sections.ps1` for this. |
 | Status line segments | `scripts/statusline.ps1` |
-| Logo | `config/logo.txt` |
+| Logo | `config/logo.txt` (the user's; ignored by git). The defaults live in `theme/logos/`. |
 | Layout ratio, projects, panel options | `config/projects.json` (see `docs/launcher.md`) |
 
 ## Rules

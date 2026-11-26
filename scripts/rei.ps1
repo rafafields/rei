@@ -13,6 +13,10 @@
   rei -All            # every project in the list
   rei -List           # show the list and exit
   rei rei -DryRun     # print what would run, launch nothing
+  rei -Config         # go to the folder Rei is installed in
+  rei -Customize      # run the installer again to change colours, font, logo, projects...
+  rei -Uninstall      # remove Rei from Alacritty and from your PowerShell profile
+  rei -Help           # list the commands
 #>
 [CmdletBinding()]
 param(
@@ -20,7 +24,11 @@ param(
     [string[]]$Name,
     [switch]$All,
     [switch]$List,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$Config,
+    [Alias('Customise')][switch]$Customize,
+    [switch]$Uninstall,
+    [switch]$Help
 )
 
 $ErrorActionPreference = 'Stop'
@@ -28,6 +36,47 @@ $ErrorActionPreference = 'Stop'
 function Fail([string]$Message) {
     Write-Host "rei: $Message" -ForegroundColor Red
     exit 1
+}
+
+# --- management commands (they work even before there is a project list) ---------------------
+$root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+
+if ($Help) {
+    Write-Host ''
+    Write-Host 'rei - Alacritty + Claude Code workspace' -ForegroundColor Red
+    Write-Host ''
+    Write-Host 'Open projects'
+    Write-Host '  rei                      menu of your projects'
+    Write-Host '  rei <name> [<name>...]   open one or several projects by name'
+    Write-Host '  rei -All                 open every project'
+    Write-Host '  rei -List                list the projects and exit'
+    Write-Host '  rei <name> -DryRun       print what would run, open nothing'
+    Write-Host ''
+    Write-Host 'Manage Rei'
+    Write-Host '  rei -Config              go to the folder where Rei is installed'
+    Write-Host '                           (config/projects.json, config/logo.txt, theme/, scripts/)'
+    Write-Host '  rei -Customize           run the installer again: projects, colours, font, logo,'
+    Write-Host '                           panel options (your current values are the defaults)'
+    Write-Host '  rei -Uninstall           remove Rei from Alacritty and your PowerShell profile'
+    Write-Host '                           (keeps the folder and your projects)'
+    Write-Host '  rei -Help                show this help'
+    Write-Host ''
+    return
+}
+
+if ($Config) {
+    # The profile function changes directory for you; this is the fallback when the script runs directly.
+    Write-Host $root
+    Invoke-Item -LiteralPath $root
+    return
+}
+
+if ($Customize -or $Uninstall) {
+    if (-not (Get-Command node -ErrorAction SilentlyContinue)) { Fail 'Node.js is required for the installer (https://nodejs.org).' }
+    $flag = if ($Uninstall) { '--uninstall' } else { '--customize' }
+    $extra = if ($DryRun) { @('--dry-run') } else { @() }
+    & node (Join-Path $root 'installer\index.mjs') $flag @extra
+    exit $LASTEXITCODE
 }
 
 # --- config -----------------------------------------------------------------
