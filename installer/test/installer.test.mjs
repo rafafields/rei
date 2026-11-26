@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { makeMapper, normaliseHex, panelColors, contrast, retintTheme } from '../lib/palette.mjs';
 import { buildConfig } from '../lib/config.mjs';
-import { buildFragment } from '../lib/theme.mjs';
+import { buildFragment, panelFontSize } from '../lib/theme.mjs';
 
 const base = fs.readFileSync(new URL('../../theme/rei.json', import.meta.url), 'utf8');
 
@@ -64,15 +64,26 @@ test('buildFragment makes a valid Rei profile and scheme, with the font', () => 
 
 test('buildConfig keeps keys it does not own', () => {
   const existing = { panel: { sections: ['git', 'today'], logo: 'C:/x/logo.txt' }, special: false, projects: [{ name: 'a', path: 'C:/a' }] };
-  const out = buildConfig(existing, { projects: existing.projects, ratio: 0.75, system: true, statusLine: true, logo: true, resetLogoPath: true, bar: 'block', colors: null, theme: null });
+  const out = buildConfig(existing, { projects: existing.projects, ratio: 0.75, system: true, statusLine: true, bar: 'block', colors: null, theme: null });
   assert.deepEqual(out.panel, { sections: ['git', 'today'] });
   assert.equal(out.special, false);
   assert.ok(!('colors' in out) && !('theme' in out) && !('layout' in out) && !('bar' in out));
 });
 
-test('buildConfig turns the logo off with null and back on', () => {
-  const off = buildConfig(null, { projects: [], ratio: 0.75, system: true, statusLine: true, logo: false, bar: 'block' });
-  assert.equal(off.panel.logo, null);
-  const on = buildConfig(off, { projects: [], ratio: 0.75, system: true, statusLine: true, logo: true, bar: 'block' });
-  assert.ok(!('panel' in on));
+test('buildConfig drops a leftover panel.logo', () => {
+  const out = buildConfig({ panel: { logo: null } }, { projects: [], ratio: 0.75, system: true, statusLine: true, bar: 'block' });
+  assert.ok(!('panel' in out));
+});
+
+test('the Rei Panel profile has a smaller font than Rei', () => {
+  const frag = JSON.parse(buildFragment(base, makeMapper({}), { family: 'Cascadia Code', size: 14 }));
+  const [main, panel] = frag.profiles;
+  assert.equal(panel.name, 'Rei Panel');
+  assert.notEqual(panel.guid, main.guid);
+  assert.deepEqual(panel.font, { face: 'Cascadia Code', size: 12 });
+  assert.equal(panel.hidden, true);
+  assert.equal(panelFontSize(null), 10);
+  assert.equal(panelFontSize(6), 6);
+  const plain = JSON.parse(buildFragment(base, makeMapper({}), {}));
+  assert.deepEqual(plain.profiles[1].font, { size: 10 });
 });

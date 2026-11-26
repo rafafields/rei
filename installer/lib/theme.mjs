@@ -13,8 +13,13 @@ export function fragmentFile() {
 }
 
 const GUID = '{7e3f6b1a-4c2d-4f0e-9a58-5d1b0c2e6a01}';
+const PANEL_GUID = '{7e3f6b1a-4c2d-4f0e-9a58-5d1b0c2e6a02}';
+const DEFAULT_SIZE = 12; // Windows Terminal's own default
 
-/** Pure: the fragment text (profile "Rei" + colour scheme "Rei") with the user's colours and font. */
+/** The panel text is a bit smaller than Claude's: 85 % of the font size, in half points. */
+export const panelFontSize = (size) => Math.max(6, Math.round((size || DEFAULT_SIZE) * 0.85 * 2) / 2);
+
+/** Pure: the fragment text (profiles "Rei" and "Rei Panel" + colour scheme "Rei") with the user's colours and font. */
 export function buildFragment(baseText, mapper, font = {}) {
   const scheme = JSON.parse(retintTheme(baseText, mapper));
   const face = font.family ? { face: font.family } : {};
@@ -27,7 +32,9 @@ export function buildFragment(baseText, mapper, font = {}) {
     padding: '12, 10, 12, 10',
     ...(font.family || font.size ? { font: { ...face, ...size } } : {}),
   };
-  return JSON.stringify({ profiles: [profile], schemes: [scheme] }, null, 2) + '\n';
+  // Same look, smaller text, hidden from the new-tab menu: used by the panel pane only.
+  const panel = { ...profile, name: 'Rei Panel', guid: PANEL_GUID, hidden: true, font: { ...face, size: panelFontSize(font.size) } };
+  return JSON.stringify({ profiles: [profile, panel], schemes: [scheme] }, null, 2) + '\n';
 }
 
 export function writeFragment(repo, mapper, font) {

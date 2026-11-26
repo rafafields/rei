@@ -13,7 +13,7 @@ Goal: make the right-hand panel show what *this* user wants to see, without brea
 5. **Wire it in** by adding the section name to `panel.sections` in `config/projects.json`. If the key does not exist yet, start from the defaults (`git`, `ports`, `check`, `system`) and put the new ones where the user wants them. Edit the file, never overwrite it, and keep the user's projects.
 6. **Test every section**: `scripts\panel.ps1 -Name <project> -TestSection <name>` until it prints OK. Show the user what it returned. If it is hidden for this project, say why.
 7. **Check the whole thing** with `scripts\panel.ps1 -Name <project> -Once -Width 40`, then tell the user to open `rei <project>` to see it live.
-8. **Offer the rest**, once: palette (`rei -Customize` asks for main and secondary colours; by hand, `theme/rei.toml` and `scripts/common.ps1` kept in sync), status line segments (`scripts/statusline.ps1`), logo (`config/logo.txt`).
+8. **Offer the rest**, once: palette (`rei -Customize` asks for main and secondary colours; by hand, `theme/rei.toml` and `scripts/common.ps1` kept in sync), status line segments (`scripts/statusline.ps1`).
 9. **Finish with a short list**: the files you created or changed, and how to undo each (delete the file in `config/widgets/` and remove its name from `panel.sections`).
 
 Never edit `scripts/panel.ps1` or `scripts/sections.ps1` to add a section, never touch the Windows Terminal settings, the Rei fragment or the PowerShell profile (the installer does that), and never commit `config/`.

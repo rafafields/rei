@@ -67,7 +67,7 @@ rei -All                 # every project in the list
 rei -List                # show the list
 rei my-project -DryRun   # print what would run, launch nothing
 rei -Config              # go to the folder where Rei is installed
-rei -Customize           # run the installer again: colours, font, logo, projects...
+rei -Customize           # run the installer again: colours, font, projects...
 rei -Uninstall           # remove Rei's terminal profile and your PowerShell profile block
 rei -Help                # list the commands
 ```

@@ -10,10 +10,9 @@ export function readConfig(repo) {
 /**
  * Pure: merges the installer's answers into the existing config. Keys the installer does not own
  * (panel.sections, special, your own additions) are kept, so running it again never wipes them.
- * `logo`: false turns the logo off; true keeps it on; `resetLogoPath` drops a custom panel.logo path
- * so the file the installer just wrote (config/logo.txt) is the one used.
+ * The logo is gone: a leftover `panel.logo` from an older install is dropped.
  */
-export function buildConfig(existing, { projects, ratio, system, statusLine, logo, resetLogoPath, bar, colors, theme }) {
+export function buildConfig(existing, { projects, ratio, system, statusLine, bar, colors, theme }) {
   const cfg = { ...(existing ?? {}) };
   const set = (key, value, isDefault) => { if (isDefault) delete cfg[key]; else cfg[key] = value; };
   set('bar', bar, bar !== '/' && bar !== '|');
@@ -23,8 +22,7 @@ export function buildConfig(existing, { projects, ratio, system, statusLine, log
   set('statusLine', false, statusLine !== false);
   const panel = { ...(cfg.panel ?? {}) };
   if (system === false) panel.system = false; else delete panel.system;
-  if (logo === false) panel.logo = null;
-  else if (resetLogoPath || panel.logo === null) delete panel.logo;
+  delete panel.logo;
   set('panel', panel, !Object.keys(panel).length);
   set('colors', colors, !colors);
   set('theme', theme, !theme);

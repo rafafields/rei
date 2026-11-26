@@ -3,7 +3,7 @@
   Rei panel: the narrow "special" terminal that sits next to Claude Code.
 
 .DESCRIPTION
-  The panel itself only draws a header (logo, project name and path), the sections, and a footer.
+  The panel itself only draws a header (kanji, project name and path), the sections, and a footer.
   Everything in between is a section: a small script that returns a title and some lines.
   Built-in sections (scripts/sections/): git, ports, check, system. Your own go in config/widgets/.
   Which sections show, and in what order, is "panel.sections" in the config.
@@ -46,15 +46,6 @@ $barChar = Get-ReiBarChar
 
 $panelCfg = $config.panel
 $showSystem = -not ($panelCfg -and $panelCfg.system -is [bool] -and -not $panelCfg.system)
-# Logo: "panel.logo" = a path; null (or empty) turns it off; unset = config/logo.txt, else the default in theme/logos.
-$logoOff = $panelCfg -and $panelCfg.PSObject.Properties['logo'] -and [string]::IsNullOrWhiteSpace([string]$panelCfg.logo)
-$logoPath = if ($panelCfg -and $panelCfg.logo) { [string]$panelCfg.logo }
-            elseif (Test-Path -LiteralPath (Join-Path $PSScriptRoot '..\config\logo.txt')) { Join-Path $PSScriptRoot '..\config\logo.txt' }
-            else { Join-Path $PSScriptRoot '..\theme\logos\rei-braille.txt' }
-$logoLines = @()
-if (-not $logoOff -and (Test-Path -LiteralPath $logoPath)) { $logoLines = @(Get-Content -LiteralPath $logoPath -Encoding UTF8 | ForEach-Object { $_.TrimEnd() }) }
-$logoWidth = if ($logoLines.Count) { ($logoLines | Measure-Object -Property Length -Maximum).Maximum } else { 0 }
-
 # Dev project: explicit "dev" in the project entry, else detected from common marker files.
 $isDev = if ($project.dev -is [bool]) { $project.dev } else {
     $markers = 'package.json', 'pyproject.toml', 'requirements.txt', 'go.mod', 'Cargo.toml', 'pom.xml', 'build.gradle', 'composer.json', 'Gemfile', 'deno.json'
@@ -122,10 +113,6 @@ function Wait-Sections([double]$Limit = 4) {
 function Build-Frame([int]$w) {
     $lines = New-Object System.Collections.Generic.List[string]
     $inner = $w - 2
-    if ($logoLines.Count -gt 0 -and $inner -ge $logoWidth) {
-        foreach ($l in $logoLines) { $lines.Add("$($C.Accent)$l$($C.Reset)") }
-        $lines.Add('')
-    }
     $lines.Add("$($C.Bold)$($C.Accent)$kanji$($C.Reset) $($C.Text)$(Cut $Name ($inner - 4))$($C.Reset)")
     $lines.Add("$($C.Dim)$(CutLeft $dir $inner)$($C.Reset)")
 

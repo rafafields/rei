@@ -14,7 +14,7 @@
   rei -List           # show the list and exit
   rei rei -DryRun     # print what would run, launch nothing
   rei -Config         # go to the folder Rei is installed in
-  rei -Customize      # run the installer again to change colours, font, logo, projects...
+  rei -Customize      # run the installer again to change colours, font, projects...
   rei -Uninstall      # remove Rei from Windows Terminal and from your PowerShell profile
   rei -Help           # list the commands
 #>
@@ -54,8 +54,8 @@ if ($Help) {
     Write-Host ''
     Write-Host 'Manage Rei'
     Write-Host '  rei -Config              go to the folder where Rei is installed'
-    Write-Host '                           (config/projects.json, config/logo.txt, theme/, scripts/)'
-    Write-Host '  rei -Customize           run the installer again: projects, colours, font, logo,'
+    Write-Host '                           (config/projects.json, theme/, scripts/)'
+    Write-Host '  rei -Customize           run the installer again: projects, colours, font,'
     Write-Host '                           panel options (your current values are the defaults)'
     Write-Host '  rei -Uninstall           remove Rei from Windows Terminal and your PowerShell profile'
     Write-Host '                           (keeps the folder and your projects)'
@@ -132,6 +132,8 @@ $maximized = -not ($reiConfig.layout -and $reiConfig.layout.maximized -is [bool]
 # The installer writes a Windows Terminal fragment with the "Rei" profile (colours, font, padding).
 $fragment = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows Terminal\Fragments\rei\rei.json'
 $profileArgs = if (Test-Path -LiteralPath $fragment) { @('-p', 'Rei') } else { @() }
+# The panel pane uses "Rei Panel": same look, smaller text. Only if the installed fragment has it.
+$panelProfileArgs = if ((Test-Path -LiteralPath $fragment) -and ((Get-Content -LiteralPath $fragment -Raw) -match 'Rei Panel')) { @('-p', '"Rei Panel"') } else { $profileArgs }
 
 # --- Claude settings: Rei status line, only for sessions started by rei --------------
 # Passed with `claude --settings <file>`, so your own ~/.claude/settings.json (and any other
@@ -149,8 +151,10 @@ if (-not ($reiConfig.statusLine -is [bool] -and -not $reiConfig.statusLine)) {
 }
 
 # --- launch -----------------------------------------------------------------
-# One Windows Terminal window; each project is a tab named after it, with Claude on the left and the
-# panel on the right (a native split: drag the divider with the mouse).
+# One shared Windows Terminal window named "rei": every `rei` command adds its projects as tabs to it
+# (a new window is created only if none is open). Each tab is titled with the kanji and the project
+# name, with Claude on the left and the panel on the right (a native split: drag the divider).
+$kanji = [string][char]0x96F6
 $commands = New-Object System.Collections.Generic.List[string]
 $opened = New-Object System.Collections.Generic.List[string]
 foreach ($p in $selected) {
@@ -159,7 +163,7 @@ foreach ($p in $selected) {
         continue
     }
     $dir = (Resolve-Path -LiteralPath $p.path).Path
-    $title = Quote $p.name
+    $title = Quote "$kanji $($p.name)"
     $tab = @('new-tab') + $profileArgs + @('--title', $title, '--suppressApplicationTitle', '-d', (Quote $dir)) + ($claudeCommand | ForEach-Object { Quote $_ })
     $commands.Add($tab -join ' ')
     # "special": omitted = the built-in panel; an array = your own command; false = no second pane.
@@ -169,15 +173,17 @@ foreach ($p in $selected) {
         } else {
             @('powershell.exe', '-NoLogo', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $PSScriptRoot 'panel.ps1'), '-Name', $p.name)
         }
-        $pane = @('split-pane', '-V', '-s', ([string]::Format([cultureinfo]::InvariantCulture, '{0:0.##}', (1 - $ratio)))) + $profileArgs + @('--title', $title, '--suppressApplicationTitle', '-d', (Quote $dir)) + ($special | ForEach-Object { Quote $_ })
+        $pane = @('split-pane', '-V', '-s', ([string]::Format([cultureinfo]::InvariantCulture, '{0:0.##}', (1 - $ratio)))) + $panelProfileArgs + @('--title', $title, '--suppressApplicationTitle', '-d', (Quote $dir)) + ($special | ForEach-Object { Quote $_ })
         $commands.Add($pane -join ' ')
         $commands.Add('move-focus left')
     }
     $opened.Add($p.name)
 }
 if ($commands.Count -eq 0) { Fail 'nothing to open.' }
-$commands.Add('focus-tab -t 0')
-$wtArgs = @('-w', 'new') + $(if ($maximized) { @('--maximized') } else { @() })
+# Focus the first tab opened by this command (the window may already hold other tabs): the last one
+# is focused after creating them, so step back once per extra tab.
+for ($i = 1; $i -lt $opened.Count; $i++) { $commands.Add('focus-tab -p') }
+$wtArgs = @('-w', 'rei') + $(if ($maximized) { @('--maximized') } else { @() })
 $line = ($wtArgs -join ' ') + ' ' + ($commands -join ' ; ')
 
 if ($DryRun) {

@@ -12,7 +12,6 @@ Always:
 
 | Item | Source |
 |---|---|
-| Logo | `config/logo.txt` or `panel.logo` (optional) |
 | Project name and path | the config |
 | Branch | `git status --porcelain=v2 --branch` |
 | New, modified and deleted files | the same command; each file counts once (deleted wins over new, new over modified) |

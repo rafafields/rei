@@ -1,6 +1,6 @@
 # Panel sections
 
-The panel draws a header (logo, project name, path), a list of **sections** and a clock. Everything between header and clock is a section: a small PowerShell script that returns a title and some lines.
+The panel draws a header (kanji, project name, path), a list of **sections** and a clock. Everything between header and clock is a section: a small PowerShell script that returns a title and some lines.
 
 Built-in sections live in `scripts/sections/`: `git`, `ports`, `check`, `system`. Your own go in `config/widgets/` (git-ignored, so they stay on your machine). A name in `config/widgets/` is only used when there is no built-in with that name.
 
